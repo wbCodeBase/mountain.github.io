@@ -320,13 +320,27 @@ button { font: inherit; cursor: pointer; }
 .feat__item p { color: var(--muted); font-size: .97rem; margin: 0; }
 
 /* ---------- Steps ---------- */
-.steps { display: grid; gap: 0; counter-reset: s; position: relative; }
+.steps { display: grid; gap: 0; counter-reset: s; position: relative; isolation: isolate; }
 .step { position: relative; padding: 28px 0 28px 64px; border-top: 1px solid var(--line); }
 .step:last-child { border-bottom: 1px solid var(--line); }
-.step__num { position: absolute; left: 0; top: 26px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--ink); display: grid; place-items: center; font-weight: 700; font-size: .85rem; color: var(--ink); transition: background .4s, color .4s; }
+.step__num {
+  position: absolute; left: 0; top: 26px; z-index: 1; width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--ink); background: #fff; display: grid; place-items: center;
+  font-weight: 700; font-size: .85rem; letter-spacing: .02em; color: var(--ink); font-variant-numeric: tabular-nums;
+  transition: background .45s, color .45s, transform .45s var(--ease-out), box-shadow .45s;
+}
 .step.is-in .step__num { background: var(--ink); color: #fff; transition-delay: calc(var(--d, 0ms) + .3s); }
-.step h3 { margin-bottom: 6px; font-size: 1.25rem; }
+.step:hover .step__num { transform: scale(1.1); box-shadow: 0 10px 22px -10px rgba(17,18,20,.55); transition-delay: 0s; }
+.step h3 { margin-bottom: 6px; font-size: 1.25rem; transition: transform .45s var(--ease-out); }
+.step:hover h3 { transform: translateX(3px); }
 .step p { color: var(--muted); margin: 0; }
+/* Vertical connector between stacked circles (centre of one → centre of next) */
+.step:not(:last-child)::after {
+  content: ''; position: absolute; left: 22px; top: 70px; bottom: -26px; width: 1px; z-index: 0;
+  background: var(--ink); transform: scaleY(0); transform-origin: top;
+  transition: transform .9s var(--ease-out) calc(var(--d, 0ms) + .5s);
+}
+.step.is-in:not(:last-child)::after { transform: scaleY(1); }
 
 /* ---------- Locations ---------- */
 .locs { display: grid; grid-auto-flow: column; grid-auto-columns: 72%; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; scrollbar-width: none; }
@@ -692,11 +706,22 @@ a.ccard:hover { border-color: var(--ink); transform: translateX(4px); }
   .locs { grid-auto-flow: row; grid-template-columns: 1.5fr repeat(4, 1fr); overflow: visible; }
   .loc--live { aspect-ratio: auto; }
   .steps--h { grid-template-columns: repeat(4, 1fr); gap: 0; }
-  .steps--h .step { padding: 80px 28px 8px 0; border-top: 1px solid var(--line); border-bottom: 0; }
-  .steps--h .step__num { top: -22px; background: #fff; }
-  .steps--h .step.is-in .step__num { background: var(--ink); }
-  .steps--h::before { content: ''; position: absolute; left: 0; top: -1px; height: 1px; width: 100%; background: var(--ink); transform: scaleX(var(--progress, 0)); transform-origin: 0; transition: transform 1.6s var(--ease-out); z-index: 1; }
-  .steps--h { margin-top: 24px; }
+  .steps--h { margin-top: 30px; }
+  .steps--h .step { padding: 58px 32px 8px 0; border: 0; }
+  .steps--h .step::after { display: none; }
+  /* Circle sits on the line; the halo (section background) leaves a neat gap around it */
+  .steps--h .step__num { top: -22px; box-shadow: 0 0 0 8px var(--steps-bg, var(--fill)); }
+  .steps--h .step:hover .step__num { box-shadow: 0 0 0 8px var(--steps-bg, var(--fill)), 0 12px 24px -10px rgba(17,18,20,.55); }
+  /* Track (grey) and progress (ink) run centre of 01 → centre of 04, behind the circles */
+  .steps--h::before, .steps--h::after { content: ''; position: absolute; left: 22px; top: 0; width: 75%; height: 1px; z-index: -1; }
+  .steps--h::after { background: var(--line-2); }
+  .steps--h::before { z-index: 0; background: var(--ink); transform: scaleX(var(--progress, 0)); transform-origin: 0; transition: transform 2s var(--ease-out); }
+  /* Fill each circle as the line reaches it */
+  .steps--h .step.is-in .step__num { transition-delay: .25s; }
+  .steps--h .step.is-in:nth-child(2) .step__num { transition-delay: .55s; }
+  .steps--h .step.is-in:nth-child(3) .step__num { transition-delay: .95s; }
+  .steps--h .step.is-in:nth-child(4) .step__num { transition-delay: 1.45s; }
+  .section:not(.section--fill) .steps--h { --steps-bg: #fff; }
   .contact-grid { grid-template-columns: 1fr 1.1fr; gap: 56px; align-items: start; }
   .prose-wrap { grid-template-columns: 260px 1fr; gap: 72px; }
   .cols2 { grid-template-columns: 1fr 1fr; gap: 24px; }
