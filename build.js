@@ -70,7 +70,7 @@ function build() {
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemap
       .map((s) => `  <url><loc>${s.loc}</loc><lastmod>${today}</lastmod><priority>${s.pri}</priority></url>`).join('\n')}\n</urlset>\n`);
   fs.writeFileSync(path.join(DIST, 'robots.txt'), PREVIEW
-    ? 'User-agent: *\nDisallow: /\n'
+    ? 'User-agent: *\nAllow: /\n'
     : `User-agent: *\nAllow: /\nDisallow: /thank-you/\n\nSitemap: ${cfg.domain}/sitemap.xml\n`);
   if (PREVIEW) fs.writeFileSync(path.join(DIST, '.nojekyll'), '');
   // Sister-domain placeholders (deploy each as index.html on its own domain)
